@@ -1,0 +1,55 @@
+server:
+  port: ${SERVER_PORT}  # 팀 전용 포트
+
+spring:
+  application:
+    name: javara
+    mvc:
+      throw-exception-if-no-handler-found: true
+    web:
+      resources:
+        add-mappings: false
+
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}  # 환경 변수로 설정
+    password: ${DB_PASSWORD}  # 환경 변수로 설정
+    driver-class-name: org.mariadb.jdbc.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+
+  #이미지관련
+  file:
+    directory: /home/t25111/img
+    serverUrl: http://ceprj.gachon.ac.kr:60011/home/t25111/img/
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 10MB
+security:
+  jwt:
+    secretKey: ${JWT_SECRET_KEY}
+    accessExpiration: ${ACCESS_EXP}
+    refreshExpiration: ${REFRESH_EXP}
+
+springdoc:
+  swagger-ui:
+    operationsSorter: alpha
+    tags-sorter: alpha
+    display-request-duration: true
+
+# 백업 설정
+app:
+  backup:
+    directory: /home/t25111/backup
+    mysqldump:
+      path: mysqldump
+    schedule: 0 0 * * * *
+    # 매일 1시간마다 테스트로 백업(초 분 시 일 월 요일)

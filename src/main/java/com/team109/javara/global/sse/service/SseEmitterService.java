@@ -1,5 +1,8 @@
 package com.team109.javara.global.sse.service;
 
+import com.team109.javara.global.sse.component.SseConnections;
+import com.team109.javara.global.sse.controller.SseController;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.web.servlet.mvc.method.annotation.SseEmitter;
@@ -10,9 +13,11 @@ import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 @Service
+@RequiredArgsConstructor
 public class SseEmitterService {
 
     private static final Long TIMEOUT = 300L * 60 * 1000;
+    private final SseConnections sseConnections;
 
     //  Map으로 policeId별 sseemitter 설정
     private final Map<Long, SseEmitter> emitters = new ConcurrentHashMap<>();
@@ -20,26 +25,30 @@ public class SseEmitterService {
     public SseEmitter createEmitter(Long memberId) {
         SseEmitter emitter = new SseEmitter(TIMEOUT);
         this.emitters.put(memberId, emitter);
+        sseConnections.add(memberId);
 
         // emitters 맵에서 제거
         emitter.onTimeout(() -> {
             log.info("SSE 타임아웃: member [{}]", memberId);
             this.emitters.remove(memberId);
+            sseConnections.remove(memberId);
         });
 
         // 완료 emitters 맵에서 제거
         emitter.onCompletion(() -> {
             log.info("SSE 완료: member [{}]", memberId);
             this.emitters.remove(memberId);
+            sseConnections.remove(memberId);
         });
 
         // 에러 emitters 맵에서 제거
         emitter.onError(e -> {
             log.error("SSE 에러: member [{}]", memberId, e);
             this.emitters.remove(memberId);
+            sseConnections.remove(memberId);
         });
 
-        //TODO 없이 해보고 작동하면 지우기
+
 //        try {
 //            emitter.send(SseEmitter.event()
 //                    .id(memberId + "_" + System.currentTimeMillis()) // 이벤트 ID

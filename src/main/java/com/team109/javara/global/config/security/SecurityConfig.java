@@ -46,6 +46,11 @@ public class SecurityConfig {
                         //swagger
                         .requestMatchers("/v3/api-docs","/v3/api-docs/**", "/v3/api-docs.yaml", "/swagger-ui/**", "/swagger-ui.html", "/swagger-resources", "/swagger-resources/**", "/configuration/ui", "/configuration/security", "/webjars/**").permitAll()
 
+                        //react
+                        .requestMatchers("/", "/index.html", "/favicon.ico", "/manifest.json", "/static/**", "/css/**", "/js/**", "/images/**").permitAll()
+                        .requestMatchers("/**").permitAll()
+
+
                         //login 관련
                         .requestMatchers("/api/auth/login", "/api/auth/signup").permitAll()
 
@@ -54,7 +59,7 @@ public class SecurityConfig {
 
                         //test
                         .requestMatchers("/test/**").permitAll()
-                        .requestMatchers("/api/edge-devices/**").permitAll()
+                        .requestMatchers("/api/edge-devices/**", "/topic/**", "/app/**", "/user/**", "/queue/**").permitAll()
                         .requestMatchers("/api/edge-devices/verification").permitAll()
                         .requestMatchers("/images/**").permitAll()
 

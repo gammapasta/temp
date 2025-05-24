@@ -39,8 +39,9 @@ public class AdminMemberServiceImpl implements AdminMemberService {
                 .username(requestDto.getUsername())
                 .password(passwordEncoder.encode(requestDto.getPassword()))
                 .name(requestDto.getName())
-                .gender(Gender.valueOf(requestDto.getGender()))
-                .role(Role.valueOf(requestDto.getRole()))
+                .gender(requestDto.getGender())
+                .role(requestDto.getRole())
+                .penaltyPoints(requestDto.getPenaltyPoints())
                 .policeId(requestDto.getPoliceId())
                 .edgeDeviceId(requestDto.getEdgeDeviceId())
                 .build();
@@ -73,8 +74,9 @@ public class AdminMemberServiceImpl implements AdminMemberService {
 
         member.changePassword(passwordEncoder.encode(requestDto.getPassword()));
         member.setMemberStatus(member.getMemberStatus()); // 필요하면 수정
-        member.changeRole(Role.valueOf(requestDto.getRole()));
+        member.changeRole(requestDto.getRole());
         member.setEdgeDeviceId(requestDto.getEdgeDeviceId());
+        member.setPenaltyPoints(requestDto.getPenaltyPoints());
         // 기타 필요 필드 추가 수정
 
         return MemberInfoResponseDto.fromEntity(memberRepository.save(member));
@@ -137,6 +139,7 @@ public class AdminMemberServiceImpl implements AdminMemberService {
             case "role" -> member.setRole(Role.valueOf(value));
             case "policeId" -> member.setPoliceId(value);
             case "edgeDeviceId" -> member.setEdgeDeviceId(value);
+            case "penaltyPoints" ->member.setPenaltyPoints(Double.valueOf(value));
             default -> throw new GlobalException(ErrorCode.INVALID_INPUT_VALUE, "지원하지 않는 필드명입니다.");
         }
 

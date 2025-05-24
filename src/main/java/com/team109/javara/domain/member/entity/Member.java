@@ -66,8 +66,8 @@ public class Member implements UserDetails {
     @Column(name = "member_status",nullable = true)
     private MemberStatus memberStatus; //순찰상태
 
-    @Column(precision = 5, scale = 2)
-    private BigDecimal penaltyPoints = BigDecimal.ZERO;
+    @Column(columnDefinition = "DOUBLE")
+    private Double penaltyPoints = 0.0;
 
     @CreationTimestamp
     @Column(name = "created_at", nullable = false, updatable = false)
@@ -158,8 +158,10 @@ public class Member implements UserDetails {
     public void setEdgeDeviceId(String newEdgeDeviceId) {
         this.edgeDeviceId = newEdgeDeviceId;
     }
-    public void setAdmin(Role role){this.role = role;} //TODO 지워야함
-
+    public void setAdmin(Role role){this.role = role;}
+    public void reducePenalty(Member member){
+        member.setPenaltyPoints(member.getPenaltyPoints() - 0.1);
+    }
     //로직 부분
     //핼퍼 매소드
     public void addImage(Image image) {

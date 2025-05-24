@@ -28,7 +28,6 @@ public class AuthController {
 
 
     @PostMapping("/login")
-    // 성공 시 BaseResponse 직접 반환 (기본 200 OK 상태 코드)
     public BaseResponse<TokenResponseDto> authenticateUser(@Valid @RequestBody LoginRequestDto loginRequestDto) {
         TokenResponseDto tokenResponseDto = authService.login(loginRequestDto);
         log.info("로그인 성공: {}", loginRequestDto.getUsername()); // 성공 로그 변경
@@ -37,7 +36,6 @@ public class AuthController {
 
 
     @PostMapping("/signup")
-    // 회원가입 성공 시 201 Created 상태 코드를 명시적으로 반환하기 위해 ResponseEntity 사용
     public BaseResponse<MemberInfoResponseDto> registerUser(@Valid @RequestBody SignupRequestDto signupRequestDto) {
         MemberInfoResponseDto memberInfoResponseDto = authService.register(signupRequestDto);
         log.info("회원가입 성공: {}", signupRequestDto.getPoliceId());

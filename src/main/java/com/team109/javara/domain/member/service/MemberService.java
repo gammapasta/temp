@@ -24,6 +24,7 @@ public class MemberService {
     private final CommandService commandService;
 
     //맴버 검증
+    @Transactional(readOnly = true)
     public Member getCurrentMember(UserDetails userDetails) {
         if (userDetails == null) {
             throw new GlobalException(ErrorCode.AUTHENTICATION_FAILED);
@@ -69,10 +70,10 @@ public class MemberService {
             throw new GlobalException(ErrorCode.DEVICE_NOT_FOUND, "디바이스id 못찾음: " + memberId);
         }
 
-        if (member.getMemberStatus() == newStatus) {
-            log.info("Member [{}] 현재 상태와 같음 newStatus [{}].", memberId, newStatus);
-            throw new GlobalException(ErrorCode.DUPLICATE_STATUS);
-        }
+//        if (member.getMemberStatus() == newStatus) {
+//            log.info("Member [{}] 현재 상태와 같음 newStatus [{}].", memberId, newStatus);
+//            throw new GlobalException(ErrorCode.DUPLICATE_STATUS);
+//        }
 
         SessionCommand command = new SessionCommand();
 
@@ -90,6 +91,7 @@ public class MemberService {
                     command.setCommand("stop");
                     break;
                 default:
+                    log.warn("부적절한 값 {}", newStatus);
                     throw new GlobalException(ErrorCode.INVALID_INPUT_VALUE);
             }
         }else if(role == Role.USER){
@@ -99,6 +101,7 @@ public class MemberService {
             }else if (newStatus == MemberStatus.INACTIVE) {
                 command.setCommand("stop");
             }else {
+                log.warn("부적절한 값 {}", newStatus);
                 throw new GlobalException(ErrorCode.INVALID_INPUT_VALUE);
             }
         }
@@ -110,7 +113,6 @@ public class MemberService {
         commandService.sendCommandToDevice(deviceId, command);
     }
 
-    //TODO: 엣지디바이스 중복 로직
     @Transactional
     public void updateEdgeDeviceId(Member member, String newEdgeDeviceId) {
         Long memberId = member.getId();

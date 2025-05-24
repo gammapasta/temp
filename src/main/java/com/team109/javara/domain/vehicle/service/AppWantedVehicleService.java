@@ -4,7 +4,6 @@ import com.team109.javara.domain.member.entity.enums.Role;
 import com.team109.javara.domain.task.service.TaskService;
 import com.team109.javara.domain.vehicle.dto.*;
 import com.team109.javara.domain.vehicle.entity.WantedVehicle;
-import com.team109.javara.domain.vehicle.entity.enums.WantedVehicleStatus;
 import com.team109.javara.domain.vehicle.repository.WantedVehicleRepository;
 import com.team109.javara.global.common.exception.ErrorCode;
 import com.team109.javara.global.common.exception.GlobalException;
@@ -18,9 +17,8 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-@Transactional(readOnly = true)
+
 public class AppWantedVehicleService {
-    //TODO: 임무에 memberId 등록해야함!!!!!!!!!
 
     private final WantedVehicleRepository wantedVehicleRepository;
     private final TaskService taskService;
@@ -61,9 +59,8 @@ public class AppWantedVehicleService {
     public List<WantedVehicleResponseDto> getDetection(String reporterName, Role role) {
         // meberid에 해당하면서 잡힌 목록 보여중
         List<WantedVehicle> vehicles;
-        log.info("getDetection 시작 [{}], [{}]",reporterName,role);
 
-        //경찰일 경우에 모든 정보 줌
+        // 경찰일 경우에 모든 정보 줌
         if (role == Role.POLICE) {
             vehicles = wantedVehicleRepository.findByLocations_ReporterName(reporterName);
             log.info("나 [{}] 발견한 차량들 {}", reporterName, vehicles);

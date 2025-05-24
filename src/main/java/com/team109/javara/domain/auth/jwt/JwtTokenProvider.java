@@ -23,16 +23,16 @@ import java.util.Date;
 public class JwtTokenProvider {
 
 
-    //처음 서버 실행될떄
+    // 처음 서버 실행될떄
     private static final String AUTHORITIES_KEY = "auth";
     private final Key key;  //서버 종료 전까지 key 고정
-    private final long accessTokenExpiration; // 만료 시간 필드
+    private final long accessTokenExpiration;
     private final long refreshTokenExpiration;
 
     // JwtTokenProvider 빈이 생성될 때 한번반 만들어서 재사용함
     public JwtTokenProvider(JwtConfig jwtConfig) {
         byte[] keyBytes = jwtConfig.getSecretKey().getBytes();
-        this.key = Keys.hmacShaKeyFor(keyBytes); // Key 객체 생성
+        this.key = Keys.hmacShaKeyFor(keyBytes);
         this.accessTokenExpiration = jwtConfig.getAccessExpiration();
         this.refreshTokenExpiration = jwtConfig.getRefreshExpiration();
     }
@@ -71,17 +71,17 @@ public class JwtTokenProvider {
     }
 
 
-    //refresh token으로 access token 생성하기
+    // refresh token으로 access token 생성하기
     public String createNewAccessToken(String refreshToken) {
-        //1. refresh token 확인
+        // 1. refresh token 확인
         if (!validateToken(refreshToken)) {
-            throw new JwtException("Invalid refresh token");
+            throw new JwtException("유효하지 ㅇ낳은 refresh token");
         }
 
-        //2. refresh token에서 authentication 가져옴
+        // 2. refresh token에서 authentication 가져옴
         Authentication authentication = getAuthentication(refreshToken);
 
-        //3. 새로운 access token 만들기
+        // 3. 새로운 access token 만들기
         String authorities = authentication.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority)
                 .collect(Collectors.joining(","));
@@ -101,7 +101,7 @@ public class JwtTokenProvider {
 
     // 토큰에서 Authentication 추출
     public Authentication getAuthentication(String token) {
-        //권한 정보를 읽기, token의 payload (key value) 들
+        // token의 payload에서 읽기
         Claims claims = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()

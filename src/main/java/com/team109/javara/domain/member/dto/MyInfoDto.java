@@ -21,7 +21,7 @@ public class MyInfoDto {
     private Role role;
     private String policeId;
     private MemberStatus memberStatus; //순찰상태
-    private BigDecimal penaltyPoints;
+    private Double penaltyPoints;
     private LocalDateTime createdAt;
     private String edgeDeviceId;
 

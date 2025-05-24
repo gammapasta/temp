@@ -43,6 +43,7 @@ public enum ErrorCode {
     INVALID_TASK_STATUS_FOR_REJECTION(HttpStatus.BAD_REQUEST, "거절은 assigned 상태(앱으로 알림 보낸 상태)에서만 가능합니다."),
     INVALID_TASK_STATUS_FOR_RESULT_PROCESSING(HttpStatus.BAD_REQUEST,"ACCEPT 상태의 임무만 완료 여부(COMPLETE, FAIL)를 설정할 수 있습니다. "),
     TASK_NOT_ASSIGNED_TO_THIS_police_FOR_EXECUTION(HttpStatus.BAD_REQUEST, "해당 임무 결과가 다른 경찰에 할당되어 있어 완료 할 수 없습니다"),
+    TASK_ALREADY_ACCEPTED(HttpStatus.BAD_REQUEST,"경찰관이 이미 수락한 Task입니다."),
 
     // 서버 내부 오류 (500 Internal Server Error)
     INTERNAL_SERVER_ERROR(HttpStatus.INTERNAL_SERVER_ERROR, "서버 내부 오류가 발생했습니다."),

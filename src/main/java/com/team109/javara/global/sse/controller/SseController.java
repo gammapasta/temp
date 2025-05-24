@@ -1,7 +1,6 @@
 package com.team109.javara.global.sse.controller;
 
 import com.team109.javara.domain.member.entity.Member;
-import com.team109.javara.domain.member.repository.MemberRepository;
 import com.team109.javara.domain.member.service.MemberService;
 import com.team109.javara.global.sse.service.SseEmitterService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -25,6 +24,7 @@ public class SseController {
     private final SseEmitterService sseEmitterService;
     private final MemberService memberService;
 
+
     @Operation(summary = "sse 연결")
     @GetMapping(value = "/connect", produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     public ResponseEntity<SseEmitter> connect(@AuthenticationPrincipal UserDetails userDetails) {
@@ -39,6 +39,4 @@ public class SseController {
             return ResponseEntity.status(500).build();
         }
     }
-
-
 }

@@ -26,6 +26,13 @@ public interface WantedVehicleRepository extends JpaRepository<WantedVehicle, Lo
 
     boolean existsByCaseNumberAndWantedVehicleIdNot(String caseNumber, Long wantedVehicleId);
 
+    //모든 caputed된 차량 최든순으로 찾기
+    @Query("""
+        SELECT w FROM WantedVehicle as w 
+        Where w.wantedVehicleStatus = :status 
+        ORDER BY w.updatedAt DESC
+    """)
+    List<WantedVehicle> findAllVehiclesByStatus(@Param("status") WantedVehicleStatus status);
 
     //특정 조건으로 검색 쿼리
     @Query("SELECT w FROM WantedVehicle w WHERE " +

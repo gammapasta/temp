@@ -28,7 +28,7 @@ public class AppMemberController {
     private final MemberService memberService;
 
 
-    //TODO: 서비스로 이동, 지금은 컨트롤러에 넣고
+
     @Operation(summary = "비밀번호 변경 post")
     @PostMapping(value = "/password")
     public BaseResponse<Object> updatePassword(

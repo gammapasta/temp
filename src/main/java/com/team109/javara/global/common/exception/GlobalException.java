@@ -8,21 +8,20 @@ public class GlobalException extends RuntimeException{
     private final ErrorCode errorCode;
     private final String detailMessage; // 기본 메시지 외 추가 상세 정보
 
-    // ErrorCode만 받는 생성자 (기본 메시지 사용)
+    // ErrorCode
     public GlobalException(ErrorCode errorCode) {
-        super(errorCode.getMessage()); // RuntimeException의 메시지로 설정
+        super(errorCode.getMessage());
         this.errorCode = errorCode;
         this.detailMessage = errorCode.getMessage();
     }
 
-    // ErrorCode와 상세 메시지를 받는 생성자
+    // ErrorCode + 상세 메시지
     public GlobalException(ErrorCode errorCode, String detailMessage) {
-        super(detailMessage); // RuntimeException의 메시지로 상세 메시지 설정
+        super(detailMessage);
         this.errorCode = errorCode;
         this.detailMessage = detailMessage;
     }
 
-    // 필요시 Cause를 받는 생성자 추가
     public GlobalException(ErrorCode errorCode, String detailMessage, Throwable cause) {
         super(detailMessage, cause);
         this.errorCode = errorCode;

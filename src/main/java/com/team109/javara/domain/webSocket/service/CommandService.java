@@ -22,10 +22,10 @@ public class CommandService {
         String sessionId = sessionRegistry.getSessionId(deviceId);
         if (sessionId != null) {
             messagingTemplate.convertAndSendToUser(sessionId, "/topic/device/command", command, createHeaders(sessionId)); //전송이 안되던 이유가 header가 없어서 참고: puzzle-making.tistory.com/291
-            log.info("명령 [{}]을 엣지디바이스: [{}]로 보냈습니다! (세션: {})", command, deviceId, sessionId);
+            log.info("[Websocket] 명령 [{}]을 엣지디바이스: [{}]로 보냈습니다! (세션: {})", command, deviceId, sessionId);
 
         } else {
-            log.warn("엣지디바이스 [{}] 세션을 못 찾았습니다", deviceId);
+            log.warn("[Websocket] 엣지디바이스 [{}] 세션을 못 찾았습니다", deviceId);
         }
     }
 

@@ -15,11 +15,15 @@ spring:
     username: ${DB_USERNAME}  # 환경 변수로 설정
     password: ${DB_PASSWORD}  # 환경 변수로 설정
     driver-class-name: org.mariadb.jdbc.Driver
+    hikari:
+      maximum-pool-size: 20
+      leak-detection-threshold: 120000
+      connection-timeout: 60000
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
+    show-sql: false
     properties:
       hibernate:
         format_sql: true
@@ -27,7 +31,7 @@ spring:
   #이미지관련
   file:
     directory: /home/t25111/img
-    serverUrl: http://ceprj.gachon.ac.kr:60011/home/t25111/img/
+    serverImageUrl: ${SERVER_IMAGE_URL}
   servlet:
     multipart:
       enabled: true
@@ -51,5 +55,5 @@ app:
     directory: /home/t25111/backup
     mysqldump:
       path: mysqldump
-    schedule: 0 0 * * * *
-    # 매일 1시간마다 테스트로 백업(초 분 시 일 월 요일)
+    schedule: 0 0 1 * * *
+    # 매일 1시마다 테스트로 백업(초 분 시 일 월 요일)

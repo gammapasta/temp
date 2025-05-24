@@ -43,8 +43,10 @@ public class PoliceFindService {
         WantedVehicleLocation latestLocation = wantedVehicleLocationRepository
                 .findTopByWantedVehicle_WantedVehicleIdOrderBySightedAtDesc(wantedVehicleId)
                 // ex: 예외 처리(해당 wantedVehicleId로 된 위치정보가 없을 때.
-                .orElseThrow(() -> new GlobalException(ErrorCode.LOCATION_NOT_FOUND));
-
+                .orElse(null);
+        if(latestLocation == null) {
+            return null;
+        }
         // 3. 해당 수배차량의 위치를 중심 좌표로 설정 (centerLat - 위도, centerLng - 경도)
         // BigDecimal 타입을 double 타입으로 바꿈 (계산을 위해)
         double centerLat = latestLocation.getLatitude().doubleValue();
@@ -57,7 +59,7 @@ public class PoliceFindService {
         }
 
         // 5. 탐색 반경 단계 (.1km → .5km → 1km → 5km → 10km) , TODO: 조정 가능.
-        double[] searchRadii = {0.1, 0.5, 1, 5, 10};
+        double[] searchRadii = {0.1, 0.5, 1, 5, 10, 100};
 
         //6. 탐색 로직 (for 문으로 searchRadii를 늘리면서 조회)
         for (double radius : searchRadii) {
@@ -70,6 +72,67 @@ public class PoliceFindService {
 
             // 8. 박스 범위 내 후보군 조회 (이미 reject한 경찰 제외)
             // ** candidates ** <<-- 박스 범위 안의 경찰 후보군
+            List<PoliceLocation> candidates = policeLocationRepository.findWithinBoxExcluding(
+                    rejectedIds, minLat, maxLat, minLng, maxLng //거절한 경찰 ID, 박스 범위 좌표
+            );
+            // 만약, 해당 반경에 경찰이 없다면..
+            if (candidates.isEmpty()) {
+                continue; // 다음 반경으로 (6번으로 돌아감)
+            }
+
+            // 9. 후보 중 가장 가까운 경찰 선택 (하버사인 거리 계산)
+            // ** closest ** <<-- 가까운 경찰
+            Optional<PoliceLocation> closest = candidates.stream() // candidates(탐색 후보군)을 stream 형식으로 변환
+                    //min(각 후보 경찰과 중심위치(수배차량) 의 거리) => 최소값 추출
+                    .min(Comparator.comparingDouble(candidate ->
+                            // 하버사인공식 계산
+                            calculateHaversine(centerLat, centerLng, // 수배차량의 위도, 경도
+                                    candidate.getLatitude().doubleValue(), // 후보 경찰의 위도
+                                    candidate.getLongitude().doubleValue() // 후보 경찰의 경도
+                            )));
+
+            // 찾으면 ->
+            if (closest.isPresent()) {
+                log.info("가장 가까운 경찰 찾음: 경찰 ID {}", closest.get().getMember().getId());
+                return closest.get().getMember(); // 가장 가까운 경찰(Member) 엔티티 반환
+            }
+        }
+        // 못찾으면 ->
+        log.warn("반경 10km 내에서 적절한 경찰을 찾지 못함.");
+        return null; // 못 찾으면 null TODO: 호출부에서 null 처리 필요!!
+    }
+
+    public Member findAvailablePoliceFromServerInitiatedTaskAssignmentSchedule(String wantedVehicleNumber) {
+
+
+        // 수배차량의 마지막 위치
+        WantedVehicleLocation lastLocation = wantedVehicleLocationRepository
+                .findTopByWantedVehicle_WantedVehicleNumberOrderBySightedAtDesc(wantedVehicleNumber)
+                .orElse(null);
+        if(lastLocation == null) {
+            return null;
+        }
+
+        log.info("{}",lastLocation.getSightedAt());
+        double centerLat = lastLocation.getLatitude().doubleValue();
+        double centerLng = lastLocation.getLongitude().doubleValue();
+
+        // 거절한 경찰의 Id 목록 (해당 경찰은 제외하고 탐색하기 위해)
+        Set<Long> rejectedIds = new HashSet<>();
+
+        // 탐색 반경 단계 (.1km → .5km → 1km → 5km → 10km)
+        double[] searchRadii = {0.1, 0.5, 1, 5, 10,100};
+
+        // 탐색 로직 (for 문으로 searchRadii를 늘리면서 조회)
+        for (double radius : searchRadii) {
+            // 7. 박스범위 계산식
+            double delta = radius / 111.0; // radius = 10, 20, 30 ... 50  (위도 1도 ≈ 111km) # delta = x.xx도 (km 아님!)
+            double minLat = centerLat - delta; // 박스범위 최소 위도
+            double maxLat = centerLat + delta; // 박스범위 최대 위도
+            double minLng = centerLng - delta; // 박스범위 최소 경도
+            double maxLng = centerLng + delta; // 박스범위 최대 경도
+
+            //  박스 범위 내 후보군 조회 (이미 reject한 경찰 제외)
             List<PoliceLocation> candidates = policeLocationRepository.findWithinBoxExcluding(
                     rejectedIds, minLat, maxLat, minLng, maxLng //거절한 경찰 ID, 박스 범위 좌표
             );

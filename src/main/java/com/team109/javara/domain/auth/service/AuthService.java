@@ -47,16 +47,16 @@ public class AuthService {
         
         try{
             
-            //1. 인증 객체 생성
+            // 1. 인증 객체 생성
             Authentication authentication = authenticationManager.authenticate(  //AuthenticationManager로 인증
                     new UsernamePasswordAuthenticationToken(
-                            loginRequestDto.getUsername(),  //여기서 policeId 라서 나중에 바꿔야함
+                            loginRequestDto.getUsername(),
                             loginRequestDto.getPassword()
                     )
             );
             log.info("인증 객체 생성 완료");
 
-            //2. SecurityContext에 인증 정보 저장
+            // 2. SecurityContext에 인증 정보 저장
             SecurityContextHolder.getContext().setAuthentication(authentication);
             log.info("인증 정보 저장 완료");
 
@@ -96,15 +96,14 @@ public class AuthService {
         }
     }
 
-    //언제써야할지 모르겠음
     public TokenResponseDto refreshAccessToken(String refreshToken) {
         try {
 
-            //refresh token에서 유저 이름 가져오기
+            // 1. refresh token에서 유저 이름 가져오기
             Authentication authentication = jwtTokenProvider.getAuthentication(refreshToken);
             String username = authentication.getName();
 
-            //username으로 refresh token 조회
+            // 2. username으로 refresh token 조회
             RefreshToken storedToken = refreshTokenRepository.findByUsername(username).orElse(null);
 
             // 3. DB 검증
@@ -175,13 +174,13 @@ public class AuthService {
                 .gender(signupRequestDto.getGender())
                 .role(memberRole)
                 .memberStatus(MemberStatus.INACTIVE)
-                .penaltyPoints(BigDecimal.ZERO)
+                .penaltyPoints(0.0)
                 .policeId(policeId)
                 .createdAt(LocalDateTime.now())
                 .build();
 
 
-        //Member 엔티티 저장
+        // Member 엔티티 저장
         Member savedMember = memberRepository.save(newMember);
 
         // 저장된 Member 엔티티를 응답 DTO로 변환하여 반환

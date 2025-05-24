@@ -1,8 +1,7 @@
 package com.team109.javara.domain.edgeDevice.controller;
 
 import com.team109.javara.domain.edgeDevice.dto.VerificationResponseDto;
-import com.team109.javara.domain.image.dto.ImageResponse;
-import com.team109.javara.domain.image.entity.Image;
+import com.team109.javara.domain.event.event.EdgeDeviceEvent;
 import com.team109.javara.domain.image.service.ImageService;
 import com.team109.javara.domain.member.entity.Member;
 import com.team109.javara.domain.member.entity.enums.MemberStatus;
@@ -10,8 +9,8 @@ import com.team109.javara.domain.member.entity.enums.Role;
 import com.team109.javara.domain.member.repository.MemberRepository;
 import com.team109.javara.domain.member.service.MemberService;
 import com.team109.javara.domain.tracking.service.TrackingDecisionService;
+import com.team109.javara.domain.vehicle.component.WantedSet;
 import com.team109.javara.domain.vehicle.dto.EdgeDeviceWantedVehicleResponseDto;
-import com.team109.javara.domain.vehicle.dto.WantedVehicleResponseDto;
 import com.team109.javara.domain.vehicle.entity.WantedVehicle;
 import com.team109.javara.domain.vehicle.entity.enums.WantedVehicleStatus;
 import com.team109.javara.domain.vehicle.repository.WantedVehicleRepository;
@@ -21,8 +20,9 @@ import com.team109.javara.global.common.response.BaseResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.web.bind.annotation.*;
@@ -40,11 +40,12 @@ public class EdgeDeviceController {
     private final MemberService memberService;
     private final ImageService imageService;
     private final WantedVehicleRepository wantedVehicleRepository;
-    private final TrackingDecisionService trackingDecisionService;
+    private final ApplicationEventPublisher eventPublisher;
+    private final WantedSet wantedSet;
+
     // edgeDevice <-> server
-    //TODO 검증 밑, 내장 db 업데이트
     @Operation(summary = "[엣지디바이스 전용] 수배차량 검증")
-    @PostMapping(value = "/verification")
+    @PostMapping(value = "/verification", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public BaseResponse<VerificationResponseDto> verify(@RequestParam("file") MultipartFile file,
                                                         @RequestParam(value = "deviceId", required = true) String deviceId,
                                                         @RequestParam(value = "wantedVehicleNumber", required = true) String wantedVehicleNumber
@@ -70,11 +71,21 @@ public class EdgeDeviceController {
         //경찰이면서 active 경우 알림 보내야함. 아니면 그냥 일반 시민같이 수배차량 위치만 전송
         if(member.getRole() == Role.POLICE && member.getMemberStatus() == MemberStatus.ACTIVE){
             try {
-                trackingDecisionService.initiateFirstTaskDecision(member.getEdgeDeviceId(), wantedVehicle.getWantedVehicleNumber());
+                //비동기로 실행
+                eventPublisher.publishEvent(new EdgeDeviceEvent(member.getEdgeDeviceId(), wantedVehicle.getWantedVehicleNumber()));
+                //trackingDecisionService.initiateFirstTaskDecision(member.getEdgeDeviceId(), wantedVehicle.getWantedVehicleNumber());
                 log.info("initiateFirstTaskDecision 처리 완료");
             }catch (Exception e){
                 return BaseResponse.fail("Task 상태가 ACTIVE 일떄만 가능합니다.", HttpStatus.BAD_REQUEST);
             }
+        }else if(member.getRole() == Role.POLICE && (member.getMemberStatus() == MemberStatus.TRACKING || member.getMemberStatus() == MemberStatus.NOT_AVAILABLE)){
+            wantedSet.add(wantedVehicleNumber);
+        }
+        if(member.getRole()==Role.USER){
+            member.reducePenalty(member);
+            memberRepository.save(member);
+
+            wantedSet.add(wantedVehicleNumber); // 서버 주도 임무 할당 위해 수배차량 넣기
         }
 
         return BaseResponse.success("수배차량입니다", responseDto);

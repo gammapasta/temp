@@ -6,9 +6,9 @@ import lombok.Data;
 
 @Data
 public class TrackingDecisionRequestDto {
-    @NotBlank(message = "맴버id는 항목입니다.")
+    @NotNull(message = "맴버id는 항목입니다.")
     private Long memberId;
-    @NotBlank(message = "taskId는 필수입니다")
+    @NotNull(message = "taskId는 필수입니다")
     private Long taskId;
     @NotBlank(message = "수배차량 번호는 필수 항목입니다.")
     private String wantedVehicleNumber;

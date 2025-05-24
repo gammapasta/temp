@@ -16,10 +16,10 @@ import java.util.Arrays;
 import java.util.stream.Collectors;
 
 @Slf4j
-@RestControllerAdvice // 모든 @RestController 에 대한 예외 처리를 담당
+@RestControllerAdvice // 모든 @RestController 예외 처리담당
 public class GlobalExceptionHandler {
 
-    // 범용 비즈니스 로직 예외 처리 핸들러
+    // 비즈니스 로직 예외 처리
     @ExceptionHandler(GlobalException.class)
     public BaseResponse<Object> handleBusinessLogicException(GlobalException e) {
         ErrorCode errorCode = e.getErrorCode();
@@ -30,12 +30,11 @@ public class GlobalExceptionHandler {
     }
 
 
-    // @Valid 어노테이션을 유효성 검사 실패 시 발생하는 예외 처리
+    // @Valid 어노테이션을 예외 처리
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public BaseResponse<Object> handleValidationExceptions(MethodArgumentNotValidException e) {
-        log.warn("유효성 검사 실패: {}", e.getMessage()); // 실패 로그 남기기
+        log.warn("Valid 유효성 검사 실패: {}", e.getMessage());
 
-        // 에러 메시지들을 모아서 하나의 문자열
         String errorMessage = e.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -46,7 +45,6 @@ public class GlobalExceptionHandler {
         return  BaseResponse.fail(errorMessage, HttpStatus.BAD_REQUEST);
     }
 
-    // AuthService 등에서 던지는 비즈니스 로직 관련 예외 처리 (예: 중복 아이디)
     @ExceptionHandler(IllegalStateException.class)
     public BaseResponse<Object> handleIllegalStateException(IllegalStateException e) {
         log.warn("비즈니스 로직 예외 발생: {}", e.getMessage());

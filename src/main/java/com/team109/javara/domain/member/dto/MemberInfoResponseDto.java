@@ -1,6 +1,9 @@
 package com.team109.javara.domain.member.dto;
 
 import com.team109.javara.domain.member.entity.Member;
+import com.team109.javara.domain.member.entity.enums.Gender;
+import com.team109.javara.domain.member.entity.enums.MemberStatus;
+import com.team109.javara.domain.member.entity.enums.Role;
 import lombok.Builder;
 import lombok.Getter;
 
@@ -14,10 +17,10 @@ public class MemberInfoResponseDto {
         private String username;
         private String policeId; // Member 엔티티의 policeId와 매핑
         private String name;
-        private String gender; // String으로 표시
-        private String role; // Role Enum의 DisplayName 또는 Name 사용
-        private String status;
-        private BigDecimal penaltyPoints;
+        private Gender gender; // String으로 표시
+        private Role role; // Role Enum의 DisplayName 또는 Name 사용
+        private MemberStatus status;
+        private Double penaltyPoints;
         private String createdAt;
         private String edgeDeviceId;
 
@@ -30,10 +33,10 @@ public class MemberInfoResponseDto {
                     .id(member.getId())
                     .username(member.getUsername())
                     .name(member.getName())
-                    .gender(member.getGender() != null ? member.getGender().getDisplayName() : null)
-                    .role(member.getRole() != null ? member.getRole().getDisplayName() : null)
+                    .gender(member.getGender() != null ? member.getGender() : null)
+                    .role(member.getRole() != null ? member.getRole() : null)
                     .policeId(member.getPoliceId()) // Member의 policeId 사용
-                    .status(member.getMemberStatus() != null ? member.getMemberStatus().getDisplayName() : null)
+                    .status(member.getMemberStatus() != null ? member.getMemberStatus() : null)
                     .penaltyPoints(member.getPenaltyPoints())
                     .createdAt(member.getCreatedAt().toString())
                     .edgeDeviceId(member.getEdgeDeviceId())

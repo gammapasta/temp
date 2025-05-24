@@ -66,12 +66,12 @@ public class WebSocketService {
         SessionCommand stopCommand = new SessionCommand();
         try {
             if (deviceLocationDto.getLatitude() == null || deviceLocationDto.getLongitude() == null) {
-                log.warn("위치 정보가 없습니다: 엣지디바이스 [{}]", deviceId);
+                log.warn("[Websocket] 위치 정보가 없습니다: 엣지디바이스 [{}]", deviceId);
                 return;
             }
             Optional<Member> memberOptional = memberRepository.findByEdgeDeviceId(deviceId);
             if (memberOptional.isEmpty()) {
-                log.warn("엣지디바이스 [{}]가 연결했지만, 맴버를 찾을 수 없습니다.", deviceId);
+                log.warn("[Websocket] 엣지디바이스 [{}]가 연결했지만, 맴버를 찾을 수 없습니다.", deviceId);
                 stopCommand.setCommand("stop");
                 commandService.sendCommandToDevice(deviceId, stopCommand);
                 return;
@@ -89,31 +89,31 @@ public class WebSocketService {
 
             // 3. 데이터 저장 분기
             if (memberRole == Role.USER && wantedVehicleId != null) {
-                log.info("Role [USER] 수배차량 [{}]. WantedVehicleLocation에 저장",wantedVehicleId);
+                log.info("[Websocket] Role [USER] 수배차량 [{}]. WantedVehicleLocation에 저장",wantedVehicleId);
                 saveWantedVehicleLocation(latitude, longitude, member.getReporterName(), wantedVehicleId, memberId, deviceId);
             } else if (memberRole == Role.POLICE) {
                 if ((memberStatus == MemberStatus.TRACKING || memberStatus == MemberStatus.NOT_AVAILABLE) && wantedVehicleId != null) {
-                    log.info("Role [POLICE] Status [TRACKING,NOT_AVAILABLE] 수배차량 [{}]. WantedVehicleLocation에 저장",wantedVehicleId);
+                    log.info("[Websocket] Role [POLICE] Status [TRACKING,NOT_AVAILABLE] 수배차량 [{}]. WantedVehicleLocation에 저장",wantedVehicleId);
                     saveWantedVehicleLocation(latitude, longitude, member.getReporterName(), wantedVehicleId, memberId, deviceId);
                 } else if (memberStatus == MemberStatus.ACTIVE) {
-                    log.info("Role [POLICE] Status [ACTIVE]. PoliceLocation에 저장");
+                    log.info("[Websocket] Role [POLICE] Status [ACTIVE]. PoliceLocation에 저장");
                     saveMemberLocation(member, latitude, longitude, memberId, deviceId);
                 } else {
                     stopCommand.setCommand("stop");
-                    log.warn("경찰 위치를 받았지만 처리가 불가능 합니다. Role: [{}], Status: [{}], WantedVehicleId: [{}], Device: [{}]",
+                    log.warn("[Websocket] 경찰 위치를 받았지만 처리가 불가능 합니다. Role: [{}], Status: [{}], WantedVehicleId: [{}], Device: [{}]",
                             memberRole, memberStatus, wantedVehicleId, deviceId);
                 }
             } else {
                 stopCommand.setCommand("stop");
-                log.warn("위치를 admin으로 부터 받았습니다. 혹은 wantedVehicleId이 없습니다. Role: {}, Device: {}", memberRole, deviceId);
+                log.warn("[Websocket] 위치를 admin으로 부터 받았습니다. 혹은 wantedVehicleId이 없습니다. Role: {}, Device: {}", memberRole, deviceId);
             }
         }
 
         catch (GlobalException e) {
-        log.error("에러 deviceId [{}] [{}]", deviceId, e.getMessage());
+        log.error("[Websocket] 에러 deviceId [{}] [{}]", deviceId, e.getMessage());
         }
         catch (Exception e) {
-        log.error("웹소켓으로 부터 메시지를 받았지만 에러가 발생했습니다 deviceId [{}],  error {}", deviceId, e.getMessage(), e);
+        log.error("[Websocket] 웹소켓으로 부터 메시지를 받았지만 에러가 발생했습니다 deviceId [{}],  error {}", deviceId, e.getMessage(), e);
     }
 
     }
@@ -121,7 +121,7 @@ public class WebSocketService {
     private void saveWantedVehicleLocation(BigDecimal latitude, BigDecimal longitude, String reporterName, Long wantedVehicleId, Long memberId, String deviceId) {
         WantedVehicle wantedVehicle = wantedVehicleRepository.findById(wantedVehicleId)
                 .orElseThrow(() -> {
-                    log.error("수배차량을 찾지 못했습니다 위치 저장이 불가능 합니다. wantedVehicleId [{}], member [{}], deviceId [{}]", wantedVehicleId, memberId, deviceId);
+                    log.error("[Websocket] 수배차량을 찾지 못했습니다 위치 저장이 불가능 합니다. wantedVehicleId [{}], member [{}], deviceId [{}]", wantedVehicleId, memberId, deviceId);
                     SessionCommand stopCommand = new SessionCommand();
                     stopCommand.setCommand("stop");
                     commandService.sendCommandToDevice(deviceId, stopCommand);
@@ -136,7 +136,7 @@ public class WebSocketService {
         wantedVehicleLocation.setWantedVehicle(wantedVehicle);
 
         wantedVehicleLocationRepository.save(wantedVehicleLocation);
-        log.info("수배차량 위치 저장 성공! 수배차량: [{}] member: [{}] 엣지디바이스: [{}]", wantedVehicleId, memberId, deviceId);
+        log.info("[Websocket] 수배차량 위치 저장 성공! 수배차량: [{}] member: [{}] 엣지디바이스: [{}]", wantedVehicleId, memberId, deviceId);
     }
 
     private void saveMemberLocation(Member member, BigDecimal latitude, BigDecimal longitude, Long memberId, String deviceId) {
@@ -146,7 +146,7 @@ public class WebSocketService {
         newLocation.setLongitude(longitude);
 
         policeLocationRepository.save(newLocation);
-        log.info("경찰 위치 저장 성공: member: [{}] 엣지디바이스:[{}]", memberId, deviceId);
+        log.info("[Websocket] 경찰 위치 저장 성공: member: [{}] 엣지디바이스:[{}]", memberId, deviceId);
     }
 
 }

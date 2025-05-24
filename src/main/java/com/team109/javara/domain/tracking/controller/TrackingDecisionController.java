@@ -38,9 +38,11 @@ public class TrackingDecisionController {
     @PostMapping("/result")
     public BaseResponse<Object> submitResult(@Valid @RequestBody TrackingResultRequestDto requestDto, @AuthenticationPrincipal UserDetails userDetails) {
         memberService.verifyCurrentMember(userDetails);
+
+        log.info(">>>>완료 여부 결정 {}",requestDto);
         trackingDecisionService.handleResultDecision(requestDto);
 
-        return BaseResponse.success("추적 수락 여부 결정 전송 성공");
+        return BaseResponse.success("추적 완료 여부 전송 성공");
     }
 
 }

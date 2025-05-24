@@ -12,7 +12,9 @@ java {
 		languageVersion = JavaLanguageVersion.of(17)
 	}
 }
-
+jar {
+	enabled = false // plain 안만들기
+}
 configurations {
 	compileOnly {
 		extendsFrom annotationProcessor

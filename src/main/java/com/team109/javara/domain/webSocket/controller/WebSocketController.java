@@ -17,7 +17,7 @@ import org.springframework.stereotype.Controller;
 
 import java.util.Optional;
 
-//클라이언트의 /pub 메시지 핸들링, /app
+// 클라이언트의 /pub 메시지 핸들링, /app
 @Controller
 @RequiredArgsConstructor
 @Slf4j
@@ -31,7 +31,7 @@ public class WebSocketController {
     private MemberRepository memberRepository;
 
 
-    /** 2) 위치 데이터 수신 */
+    // 위치 데이터 수신
     @MessageMapping("/location")
     public void receiveLocation(@Header("simpSessionId") String sessionId,
                          @Payload DeviceLocationDto dto) {

@@ -12,7 +12,7 @@ import java.math.BigDecimal;
 @Builder
 public class MemberPenaltyPointsDto {
     private Long memberId;
-    private BigDecimal penaltyPoints;
+    private Double penaltyPoints;
 
     public static MemberPenaltyPointsDto fromEntity(Member member) {
         return MemberPenaltyPointsDto.builder()
